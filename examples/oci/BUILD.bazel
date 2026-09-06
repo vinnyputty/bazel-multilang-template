@@ -1,0 +1,81 @@
+load("@container_structure_test//:defs.bzl", "container_structure_test")
+load("@rules_oci//oci:defs.bzl", "oci_image", "oci_image_index", "oci_load")
+load("@rules_pkg//pkg:tar.bzl", "pkg_tar")
+
+package(default_visibility = ["//visibility:public"])
+
+_ARCHITECTURES = {
+    "amd64": {
+        "oci_arch": "amd64",
+        "variant": "",
+        "goarch": "amd64",
+    },
+    "arm64": {
+        "oci_arch": "arm64",
+        "variant": "",
+        "goarch": "arm64",
+    },
+    "armv7": {
+        "oci_arch": "arm",
+        "variant": "v7",
+        "goarch": "arm",
+    },
+}
+
+[
+    pkg_tar(
+        name = "greeter_layer_{}".format(name),
+        srcs = ["//examples/go/cmd/greeter:greeter_linux_{}".format(config["goarch"])],
+        package_dir = "/app",
+    )
+    for name, config in _ARCHITECTURES.items()
+]
+
+[
+    oci_image(
+        name = "greeter_image_{}".format(name),
+        architecture = config["oci_arch"],
+        entrypoint = ["/app/greeter_linux_{}".format(config["goarch"])],
+        os = "linux",
+        tars = [":greeter_layer_{}".format(name)],
+        variant = config["variant"],
+    )
+    for name, config in _ARCHITECTURES.items()
+]
+
+oci_image_index(
+    name = "greeter_image",
+    images = [":greeter_image_{}".format(name) for name in _ARCHITECTURES],
+)
+
+oci_load(
+    name = "greeter_load",
+    image = ":greeter_image_arm64",
+    repo_tags = ["bazel-multilang-template:latest"],
+)
+
+oci_load(
+    name = "greeter_load_index",
+    format = "oci",
+    image = ":greeter_image",
+    repo_tags = ["bazel-multilang-template:latest"],
+)
+
+filegroup(
+    name = "greeter_image_arm64_tar",
+    srcs = [":greeter_load"],
+    output_group = "tarball",
+)
+
+sh_test(
+    name = "greeter_image_test",
+    srcs = ["image_test.sh"],
+    data = [":greeter_image.json.sha256"],
+)
+
+container_structure_test(
+    name = "greeter_structure_test",
+    configs = ["greeter_structure_test.yaml"],
+    driver = "tar",
+    image = ":greeter_image_arm64_tar",
+)

@@ -1,0 +1,10 @@
+schemaVersion: "2.0.0"
+
+fileExistenceTests:
+  - name: greeter binary exists
+    path: /app/greeter_linux_arm64
+    shouldExist: true
+
+metadataTest:
+  entrypoint:
+    - /app/greeter_linux_arm64

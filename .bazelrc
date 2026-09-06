@@ -1,0 +1,3 @@
+# Continue evaluating targets after an individual build or test failure.
+build:CI --keep_going
+test:CI --keep_going

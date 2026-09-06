@@ -1,0 +1,36 @@
+load("@aspect_rules_lint//lint:lint_test.bzl", "lint_test")
+load(
+    "//tools/lint:linters.bzl",
+    "buildifier_test",
+    "ruff_test",
+    "shellcheck_test",
+)
+
+package(default_visibility = ["//visibility:public"])
+
+buildifier_test(
+    name = "buildifier_test",
+    srcs = ["//:starlark_files"],
+)
+
+ruff_test(
+    name = "ruff_test",
+    srcs = [
+        "//examples/python:greeter",
+        "//examples/python:greeter_test",
+    ],
+)
+
+shellcheck_test(
+    name = "shellcheck_test",
+    srcs = ["//tools:check_script"],
+)
+
+test_suite(
+    name = "all_tests",
+    tests = [
+        ":buildifier_test",
+        ":ruff_test",
+        ":shellcheck_test",
+    ],
+)

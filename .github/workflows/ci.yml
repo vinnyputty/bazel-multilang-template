@@ -1,0 +1,55 @@
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+
+permissions:
+  contents: read
+
+jobs:
+  test:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: ci
+          repository-cache: true
+
+      - name: Test all targets
+        run: bazel test --config=CI //...
+
+      - name: Build the multi-architecture image
+        run: bazel build //examples/oci:greeter_image
+
+  format:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Bazel
+        uses: bazel-contrib/setup-bazel@0.19.0
+        with:
+          bazelisk-cache: true
+          disk-cache: format
+          repository-cache: true
+
+      - name: Check formatting
+        run: bazel run //:format.check
+
+      - name: Run lint tests
+        run: bazel test //:lint
+
+      - name: Check Rust formatting
+        run: >-
+          bazel build
+          --aspects=@rules_rust//rust:defs.bzl%rustfmt_aspect
+          --output_groups=rustfmt_checks
+          //examples/rust:greeter

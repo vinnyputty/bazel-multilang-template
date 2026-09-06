@@ -1,0 +1,13 @@
+package(default_visibility = ["//visibility:public"])
+
+test_suite(
+    name = "all_tests",
+    tests = [
+        "//examples/go:greeter_test",
+        "//examples/oci:greeter_image_test",
+        "//examples/oci:greeter_structure_test",
+        "//examples/python:greeter_test",
+        "//examples/rust:greeter_test",
+        "//tools/lint:all_tests",
+    ],
+)

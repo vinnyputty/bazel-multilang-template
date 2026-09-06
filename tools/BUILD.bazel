@@ -1,0 +1,6 @@
+package(default_visibility = ["//visibility:public"])
+
+sh_test(
+    name = "check_script",
+    srcs = ["check.sh"],
+)

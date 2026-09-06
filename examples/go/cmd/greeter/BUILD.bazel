@@ -1,0 +1,38 @@
+load("@rules_go//go:def.bzl", "go_binary")
+
+package(default_visibility = ["//visibility:public"])
+
+go_binary(
+    name = "greeter",
+    srcs = ["main.go"],
+    deps = ["//examples/go:greeter"],
+)
+
+[
+    go_binary(
+        name = "greeter_linux_{}".format(arch),
+        srcs = ["main.go"],
+        goarch = arch,
+        goos = "linux",
+        deps = ["//examples/go:greeter"],
+    )
+    for arch in [
+        "amd64",
+        "arm64",
+        "arm",
+    ]
+]
+
+[
+    go_binary(
+        name = "greeter_macos_{}".format(arch),
+        srcs = ["main.go"],
+        goarch = arch,
+        goos = "darwin",
+        deps = ["//examples/go:greeter"],
+    )
+    for arch in [
+        "amd64",
+        "arm64",
+    ]
+]

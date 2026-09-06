@@ -1,0 +1,35 @@
+package(default_visibility = ["//visibility:public"])
+
+exports_files([
+    ".ruff.toml",
+    ".shellcheckrc",
+])
+
+filegroup(
+    name = "starlark_files",
+    srcs = [
+        "BUILD.bazel",
+        "MODULE.bazel",
+    ],
+    tags = ["starlark"],
+)
+
+alias(
+    name = "all_tests",
+    actual = "//examples:all_tests",
+)
+
+alias(
+    name = "format",
+    actual = "//tools/format:format",
+)
+
+alias(
+    name = "format.check",
+    actual = "//tools/format:format.check",
+)
+
+test_suite(
+    name = "lint",
+    tests = ["//tools/lint:all_tests"],
+)
